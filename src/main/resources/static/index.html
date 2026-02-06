@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS | Future Library</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+    <div class="logo">LMS Prime</div>
+    <div>
+        <a href="index.html" class="active">Discover</a>
+        <a href="login.html">Member Login</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Unlock Infinite Knowledge.</h1>
+    <p>Browse our digital collection of premium books. Check availability instantly.</p>
+
+    <input type="text" id="searchInput" class="search-box" placeholder="Search by title, author, or category..." onkeyup="filterBooks()">
+</div>
+
+<div class="book-grid" id="bookList">
+</div>
+
+<script>
+    const API = "http://localhost:8080/api/books";
+    let allBooks = [];
+
+    async function loadBooks() {
+        const res = await fetch(API);
+        allBooks = await res.json();
+
+        // Console la data varudha nu check panna:
+        console.log("Books Data:", allBooks);
+
+        displayBooks(allBooks);
+    }
+
+    function displayBooks(books) {
+        const container = document.getElementById("bookList");
+
+        if (books.length === 0) {
+            container.innerHTML = "<p style='color:white; text-align:center;'>No books found.</p>";
+            return;
+        }
+
+        container.innerHTML = books.map(book => `
+            <div class="book-card">
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <h3 style="margin:0;">${book.title}</h3>
+
+                    <span style="background:#ffd700; color:black; padding:4px 10px; border-radius:15px; font-weight:bold; font-size:0.9rem; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">
+                        ₹${book.price ? book.price : '0'}
+                    </span>
+                    </div>
+
+                <p style="color:#00d4ff; font-weight:600; margin-top:5px;">${book.author}</p>
+                <p style="color:#aaa; font-size:0.9rem;">${book.category}</p>
+
+                <span class="status-badge ${book.status === 'AVAILABLE' ? 'available' : 'issued'}">
+                    ${book.status}
+                </span>
+
+                <button class="${book.status === 'AVAILABLE' ? '' : 'disabled'}" onclick="borrowAlert()">
+                    ${book.status === 'AVAILABLE' ? 'Borrow Now' : 'Currently Unavailable'}
+                </button>
+            </div>
+        `).join("");
+    }
+
+    function filterBooks() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allBooks.filter(b =>
+            b.title.toLowerCase().includes(query) ||
+            b.author.toLowerCase().includes(query) ||
+            b.category.toLowerCase().includes(query)
+        );
+        displayBooks(filtered);
+    }
+
+    function borrowAlert() {
+        alert("🔒 Exclusive Feature: Please Login to borrow books.");
+        window.location.href = "login.html";
+    }
+
+    loadBooks();
+</script>
+
+</body>
+</html>
+

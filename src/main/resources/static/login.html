@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | LMS Prime</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<nav style="width: 100%; position: absolute; top: 0; box-sizing: border-box;">
+    <div class="logo">LMS Prime</div>
+    <a href="index.html">Back to Home</a>
+</nav>
+
+<div class="login-container">
+    <h2 style="margin-bottom: 30px;">Welcome Back</h2>
+
+    <input type="email" id="email" class="login-input" placeholder="Email Address">
+    <input type="password" id="pass" class="login-input" placeholder="Password">
+
+    <button onclick="login()" style="margin-top: 10px;">Access Account</button>
+
+    <p style="margin-top: 20px; font-size: 0.9rem; color: #888;">
+        No account? <a href="#" onclick="toggleReg()" style="color:var(--accent);">Create one</a>
+    </p>
+
+    <div id="reg-form" style="display:none; margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+        <input type="text" id="r-name" class="login-input" placeholder="Full Name">
+        <input type="email" id="r-email" class="login-input" placeholder="Email">
+        <input type="password" id="r-pass" class="login-input" placeholder="Password">
+        <button onclick="register()" style="background: var(--text-muted);">Register Now</button>
+    </div>
+</div>
+
+<script>
+    const API = "http://localhost:8080/api";
+
+    function toggleReg() {
+        const form = document.getElementById('reg-form');
+        form.style.display = form.style.display === 'block' ? 'none' : 'block';
+    }
+
+    async function login() {
+        const email = document.getElementById("email").value;
+        const pass = document.getElementById("pass").value;
+        try {
+            const res = await fetch(API + "/login", {
+                method: "POST", headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({email, password: pass})
+            });
+            const user = await res.json();
+            if(user) {
+                localStorage.setItem("user", JSON.stringify(user));
+                window.location.href = user.role === "ADMIN" ? "admin.html" : "user.html";
+            } else alert("❌ Access Denied");
+        } catch(e) { console.log(e); }
+    }
+
+    async function register() {
+        const name = document.getElementById("r-name").value;
+        const email = document.getElementById("r-email").value;
+        const pass = document.getElementById("r-pass").value;
+        await fetch(API + "/register", {
+            method: "POST", headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({name, email, password: pass})
+        });
+        alert("✅ Account Created!");
+        location.reload();
+    }
+</script>
+</body>
+</html>

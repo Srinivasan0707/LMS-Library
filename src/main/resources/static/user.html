@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="container">
+    <h2>My Library <span id="uname"></span> <button onclick="logout()" style="float:right; background:red;">Logout</button></h2>
+
+    <h3>Available Books</h3>
+    <table>
+        <thead><tr><th>ID</th><th>Title</th><th>Author</th><th>Status</th></tr></thead>
+        <tbody id="bookList"></tbody>
+    </table>
+
+    <h3>My Borrow History</h3>
+    <table>
+        <thead><tr><th>Book</th><th>Issue Date</th><th>Return Date</th><th>Fine</th></tr></thead>
+        <tbody id="myList"></tbody>
+    </table>
+</div>
+
+<script>
+    const API = "http://localhost:8080/api";
+    const user = JSON.parse(localStorage.getItem("user"));
+    if(!user) window.location.href="login.html";
+    document.getElementById("uname").innerText = "(" + user.name + ")";
+
+    function logout() { localStorage.clear(); window.location.href="login.html"; }
+
+    async function loadData() {
+        // Books
+        const bRes = await fetch(API + "/books");
+        const books = await bRes.json();
+        document.getElementById("bookList").innerHTML = books.map(b =>
+            `<tr><td>${b.id}</td><td>${b.title}</td><td>${b.author}</td><td>${b.status}</td></tr>`
+        ).join("");
+
+        // History
+        const hRes = await fetch(API + "/history/" + user.id);
+        const history = await hRes.json();
+        document.getElementById("myList").innerHTML = history.map(h =>
+            `<tr><td>${h.book.title}</td><td>${h.issueDate}</td><td>${h.returnDate || 'Pending'}</td><td>${h.fine}</td></tr>`
+        ).join("");
+    }
+    loadData();
+</script>
+</body>
+</html>
